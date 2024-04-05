@@ -73,25 +73,11 @@ impl Example {
     pub fn hotkey_sub(&self) -> Subscription<ProgramCommands> {
         iced::subscription::channel(0, 32, |mut sender| async move {
             let receiver = GlobalHotKeyEvent::receiver();
+            // poll for global hotkey events every 50ms
             loop {
-                match receiver.try_recv() {
-                    Err(_e) => {
-                        // nothing, this happens when nothing happens
-                    }
-                    Ok(t) => {
-                        // if you want to differenciate between the different codes, you can match them:
-                        // match t {
-                        //     GlobalHotKeyEvent { id: 267073199 } => { // this is for up arrow, no modifiers
-                        //         do whatever
-                        //     }
-                        // }
-                        sender
-                            .send(ProgramCommands::Received(format!("{:?}", t)))
-                            .await
-                            .unwrap()
-                    }
+                if let Ok(event) = receiver.try_recv() {
+                    sender.send(ProgramCommands::Received(format!("{:?}", t))).await.unwarp();
                 }
-                // so this will occur infinitely, i would really recommend using the `async_std` crate to put a sleep here
                 async_std::task::sleep(std::time::Duration::from_millis(50)).await;
             }
         })
