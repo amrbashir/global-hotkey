@@ -63,8 +63,6 @@ impl Application for Example {
     }
 
     fn subscription(&self) -> Subscription<Self::Message> {
-        // if you want to have multiple subscriptions, do it like this:
-        // iced::Subscription::batch(vec![self.hotkey_sub(), self.test_sub()])
         self.hotkey_sub()
     }
 }
