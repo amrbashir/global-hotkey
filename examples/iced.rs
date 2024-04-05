@@ -11,7 +11,7 @@ fn main() -> iced::Result {
 
 struct Example {
     last_pressed: String,
-    // since 0.4.0, this needs to be inside the struct. for version before, it does it.
+    // store the global manager otherwise it will be dropped and events will not be emitted
     _manager: GlobalHotKeyManager,
 }
 
