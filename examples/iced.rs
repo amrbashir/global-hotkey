@@ -77,7 +77,7 @@ impl Example {
                     sender
                         .send(ProgramCommands::Received(format!("{:?}", event)))
                         .await
-                        .unwarp();
+                        .unwrap();
                 }
                 async_std::task::sleep(std::time::Duration::from_millis(50)).await;
             }
