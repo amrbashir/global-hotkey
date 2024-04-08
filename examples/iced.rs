@@ -74,7 +74,10 @@ impl Example {
             // poll for global hotkey events every 50ms
             loop {
                 if let Ok(event) = receiver.try_recv() {
-                    sender.send(ProgramCommands::Received(format!("{:?}", event))).await.unwarp();
+                    sender
+                        .send(ProgramCommands::Received(format!("{:?}", event)))
+                        .await
+                        .unwarp();
                 }
                 async_std::task::sleep(std::time::Duration::from_millis(50)).await;
             }
