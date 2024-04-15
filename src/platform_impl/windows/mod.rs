@@ -297,6 +297,12 @@ fn key_to_vk(key: &Code) -> Option<VIRTUAL_KEY> {
         Code::AudioVolumeDown => VK_VOLUME_DOWN,
         Code::AudioVolumeUp => VK_VOLUME_UP,
         Code::AudioVolumeMute => VK_VOLUME_MUTE,
+        Code::MediaPlay => VK_PLAY,
+        Code::MediaPause => VK_PAUSE,
+        Code::MediaPlayPause => VK_MEDIA_PLAY_PAUSE,
+        Code::MediaStop => VK_MEDIA_STOP,
+        Code::MediaTrackNext => VK_MEDIA_NEXT_TRACK,
+        Code::MediaTrackPrevious => VK_MEDIA_PREV_TRACK,
         _ => return None,
     })
 }

@@ -213,6 +213,8 @@ struct HotKeyWrapper {
     hotkey: HotKey,
 }
 
+// https://macbiblioblog.blogspot.com/2014/12/key-codes-for-function-and-special-keys.html
+// can also be found in /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/HIToolbox.framework/Versions/A/Headers/Events.h
 pub fn key_to_scancode(code: Code) -> Option<u32> {
     match code {
         Code::KeyA => Some(0x00),

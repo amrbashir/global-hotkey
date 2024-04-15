@@ -381,9 +381,6 @@ fn keycode_to_x11_scancode(key: Code) -> Option<u32> {
         Code::Escape => keysym::XK_Escape,
         Code::PrintScreen => keysym::XK_Print,
         Code::ScrollLock => keysym::XK_Scroll_Lock,
-        Code::AudioVolumeDown => keysym::XF86XK_AudioLowerVolume,
-        Code::AudioVolumeMute => keysym::XF86XK_AudioMute,
-        Code::AudioVolumeUp => keysym::XF86XK_AudioRaiseVolume,
         Code::NumLock => keysym::XK_F1,
         Code::F1 => keysym::XK_F1,
         Code::F2 => keysym::XK_F2,
@@ -397,7 +394,14 @@ fn keycode_to_x11_scancode(key: Code) -> Option<u32> {
         Code::F10 => keysym::XK_F10,
         Code::F11 => keysym::XK_F11,
         Code::F12 => keysym::XK_F12,
-
+        Code::AudioVolumeDown => keysym::XF86XK_AudioLowerVolume,
+        Code::AudioVolumeMute => keysym::XF86XK_AudioMute,
+        Code::AudioVolumeUp => keysym::XF86XK_AudioRaiseVolume,
+        Code::MediaPlay => keysym::XF86XK_AudioPlay,
+        Code::MediaPause => keysym::XF86XK_AudioPause,
+        Code::MediaStop => keysym::XF86XK_AudioStop,
+        Code::MediaTrackNext => keysym::XF86XK_AudioNext,
+        Code::MediaTrackPrevious => keysym::XF86XK_AudioPrev,
         _ => return None,
     })
 }
