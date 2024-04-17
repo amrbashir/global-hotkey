@@ -26,6 +26,8 @@ pub enum Error {
     FailedToUnRegister(HotKey),
     #[error("HotKey already registerd: {0:?}")]
     AlreadyRegistered(HotKey),
+    #[error("Failed to watch media key event")]
+    FailedToWatchMediaKeyEvent,
 }
 
 /// Convenient type alias of Result type for tray-icon.

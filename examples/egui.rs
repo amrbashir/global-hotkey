@@ -7,8 +7,9 @@ use global_hotkey::{hotkey::HotKey, GlobalHotKeyEvent, GlobalHotKeyManager};
 use keyboard_types::{Code, Modifiers};
 
 fn main() -> Result<(), eframe::Error> {
-    let manager = GlobalHotKeyManager::new().unwrap();
+    let mut manager = GlobalHotKeyManager::new().unwrap();
     let hotkey = HotKey::new(Some(Modifiers::SHIFT), Code::KeyD);
+
     manager.register(hotkey).unwrap();
     let receiver = GlobalHotKeyEvent::receiver();
     std::thread::spawn(|| loop {

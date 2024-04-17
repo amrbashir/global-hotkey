@@ -141,24 +141,25 @@ impl GlobalHotKeyManager {
         })
     }
 
-    pub fn register(&self, hotkey: HotKey) -> crate::Result<()> {
+    pub fn register(&mut self, hotkey: HotKey) -> crate::Result<()> {
         self.platform_impl.register(hotkey)
     }
 
-    pub fn unregister(&self, hotkey: HotKey) -> crate::Result<()> {
+    pub fn unregister(&mut self, hotkey: HotKey) -> crate::Result<()> {
         self.platform_impl.unregister(hotkey)
     }
 
-    pub fn register_all(&self, hotkeys: &[HotKey]) -> crate::Result<()> {
+    pub fn register_all(&mut self, hotkeys: &[HotKey]) -> crate::Result<()> {
         self.platform_impl.register_all(hotkeys)?;
         Ok(())
     }
 
-    pub fn unregister_all(&self, hotkeys: &[HotKey]) -> crate::Result<()> {
+    pub fn unregister_all(&mut self, hotkeys: &[HotKey]) -> crate::Result<()> {
         self.platform_impl.unregister_all(hotkeys)?;
         Ok(())
     }
 }
+
 #[cfg(test)]
 mod tests {
     fn assert_send<T: Send>() {}

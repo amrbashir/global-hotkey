@@ -28,11 +28,12 @@ impl Application for Example {
     type Flags = ();
 
     fn new(_flags: Self::Flags) -> (Example, iced::Command<Self::Message>) {
-        let manager = GlobalHotKeyManager::new().unwrap();
+        let mut manager = GlobalHotKeyManager::new().unwrap();
         let hotkey_1 = HotKey::new(Some(Modifiers::CONTROL), Code::ArrowRight);
         let hotkey_2 = HotKey::new(None, Code::ArrowUp);
-        manager.register(hotkey_2).unwrap();
+
         manager.register(hotkey_1).unwrap();
+        manager.register(hotkey_2).unwrap();
         (
             Example {
                 last_pressed: "".to_string(),

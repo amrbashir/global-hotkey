@@ -11,7 +11,7 @@ use winit::event_loop::{ControlFlow, EventLoopBuilder};
 fn main() {
     let event_loop = EventLoopBuilder::new().build().unwrap();
 
-    let hotkeys_manager = GlobalHotKeyManager::new().unwrap();
+    let mut hotkeys_manager = GlobalHotKeyManager::new().unwrap();
 
     let hotkey = HotKey::new(Some(Modifiers::SHIFT), Code::KeyD);
     let hotkey2 = HotKey::new(Some(Modifiers::SHIFT | Modifiers::ALT), Code::KeyD);
