@@ -278,37 +278,38 @@ impl From<NSEventModifierFlags> for Modifiers {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-enum MediaKeyCode {
-    PlayPause = 16,
+#[allow(non_camel_case_types)]
+enum NX_KEYTYPE {
+    Play = 16, // Actually it's Play/Pause
     Next = 17,
     Previous = 18,
     Fast = 19,
     Rewind = 20,
 }
 
-impl TryFrom<i64> for MediaKeyCode {
+impl TryFrom<i64> for NX_KEYTYPE {
     type Error = String;
 
     fn try_from(value: i64) -> Result<Self, Self::Error> {
         match value {
-            16 => Ok(MediaKeyCode::PlayPause),
-            17 => Ok(MediaKeyCode::Next),
-            18 => Ok(MediaKeyCode::Previous),
-            19 => Ok(MediaKeyCode::Fast),
-            20 => Ok(MediaKeyCode::Rewind),
+            16 => Ok(NX_KEYTYPE::Play),
+            17 => Ok(NX_KEYTYPE::Next),
+            18 => Ok(NX_KEYTYPE::Previous),
+            19 => Ok(NX_KEYTYPE::Fast),
+            20 => Ok(NX_KEYTYPE::Rewind),
             _ => Err(String::from("Not defined media key")),
         }
     }
 }
 
-impl From<MediaKeyCode> for Code {
-    fn from(media_key: MediaKeyCode) -> Self {
-        match media_key {
-            MediaKeyCode::PlayPause => Code::MediaPlayPause,
-            MediaKeyCode::Next => Code::MediaTrackNext,
-            MediaKeyCode::Previous => Code::MediaTrackPrevious,
-            MediaKeyCode::Fast => Code::MediaFastForward,
-            MediaKeyCode::Rewind => Code::MediaRewind,
+impl From<NX_KEYTYPE> for Code {
+    fn from(nx_keytype: NX_KEYTYPE) -> Self {
+        match nx_keytype {
+            NX_KEYTYPE::Play => Code::MediaPlayPause,
+            NX_KEYTYPE::Next => Code::MediaTrackNext,
+            NX_KEYTYPE::Previous => Code::MediaTrackPrevious,
+            NX_KEYTYPE::Fast => Code::MediaFastForward,
+            NX_KEYTYPE::Rewind => Code::MediaRewind,
         }
     }
 }
@@ -368,46 +369,49 @@ unsafe extern "C" fn media_key_event_callback(
     event: CGEventRef,
     user_info: *const c_void,
 ) -> CGEventRef {
+    if ev_type != CGEventType::SystemDefined {
+        return event;
+    }
+
     let ns_event: id = msg_send![class!(NSEvent), eventWithCGEvent:event];
     let event_type: NSEventType = msg_send![ns_event, type];
+    let event_subtype: u64 = msg_send![ns_event, subtype];
 
-    if let CGEventType::SystemDefined = ev_type {
-        let event_subtype: u64 = msg_send![ns_event, subtype];
-        if event_type == NSEventType::NSSystemDefined && event_subtype == 8 {
-            // Key
-            let data_1: NSInteger = msg_send![ns_event, data1];
-            let media_key = MediaKeyCode::try_from((data_1 & 0xFFFF0000) >> 16);
-            if media_key.is_err() {
-                return event;
-            }
-            let media_key = media_key.unwrap();
+    if event_type == NSEventType::NSSystemDefined && event_subtype == 8 {
+        // Key
+        let data_1: NSInteger = msg_send![ns_event, data1];
+        let nx_keytype = NX_KEYTYPE::try_from((data_1 & 0xFFFF0000) >> 16);
+        if nx_keytype.is_err() {
+            return event;
+        }
+        let nx_keytype = nx_keytype.unwrap();
 
-            // Modifiers
-            let mod_flags: NSUInteger = msg_send![ns_event, modifierFlags];
-            let mod_flags = NSEventModifierFlags::from_bits_truncate(mod_flags);
+        // Modifiers
+        let mods: NSUInteger = msg_send![ns_event, modifierFlags];
+        let mods = NSEventModifierFlags::from_bits_truncate(mods);
 
-            // Generate hotkey for matching
-            let hotkey = HotKey::new(Some(mod_flags.into()), media_key.into());
+        // Generate hotkey for matching
+        let hotkey = HotKey::new(Some(mods.into()), nx_keytype.into());
 
-            // Prevent Arc been releaded after callback returned
-            let media_hotkeys = &*(user_info as *const Mutex<HashSet<HotKey>>);
+        // Prevent Arc been releaded after callback returned
+        let media_hotkeys = &*(user_info as *const Mutex<HashSet<HotKey>>);
 
-            if let Some(media_hotkey) = media_hotkeys.lock().unwrap().get(&hotkey) {
-                let key_flags = data_1 & 0x0000FFFF;
-                let is_pressed: bool = ((key_flags & 0xFF00) >> 8) == 0xA;
-                GlobalHotKeyEvent::send(GlobalHotKeyEvent {
-                    id: media_hotkey.id(),
-                    state: match is_pressed {
-                        true => crate::HotKeyState::Pressed,
-                        false => crate::HotKeyState::Released,
-                    },
-                });
+        if let Some(media_hotkey) = media_hotkeys.lock().unwrap().get(&hotkey) {
+            let key_flags = data_1 & 0x0000FFFF;
+            let is_pressed: bool = ((key_flags & 0xFF00) >> 8) == 0xA;
+            GlobalHotKeyEvent::send(GlobalHotKeyEvent {
+                id: media_hotkey.id(),
+                state: match is_pressed {
+                    true => crate::HotKeyState::Pressed,
+                    false => crate::HotKeyState::Released,
+                },
+            });
 
-                // Hotkey was found, return null to stop propagate event
-                return ptr::null();
-            }
+            // Hotkey was found, return null to stop propagate event
+            return ptr::null();
         }
     }
+
     event
 }
 
