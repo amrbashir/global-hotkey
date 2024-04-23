@@ -7,7 +7,7 @@ use global_hotkey::{hotkey::HotKey, GlobalHotKeyEvent, GlobalHotKeyManager};
 use keyboard_types::{Code, Modifiers};
 
 fn main() -> Result<(), eframe::Error> {
-    let mut manager = GlobalHotKeyManager::new().unwrap();
+    let manager = GlobalHotKeyManager::new().unwrap();
     let hotkey = HotKey::new(Some(Modifiers::SHIFT), Code::KeyD);
 
     manager.register(hotkey).unwrap();

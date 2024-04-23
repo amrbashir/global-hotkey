@@ -7,6 +7,7 @@ use cocoa::{
 use keyboard_types::{Code, Modifiers};
 use objc::{class, msg_send, sel, sel_impl};
 use std::{
+    cell::RefCell,
     collections::{BTreeMap, HashSet},
     ffi::c_void,
     ptr,
@@ -37,8 +38,8 @@ mod ffi;
 pub struct GlobalHotKeyManager {
     event_handler_ptr: EventHandlerRef,
     hotkeys: Mutex<BTreeMap<u32, HotKeyWrapper>>,
-    event_tap: Option<CFMachPortRef>,
-    event_tap_source: Option<CFRunLoopSourceRef>,
+    event_tap: RefCell<Option<CFMachPortRef>>,
+    event_tap_source: RefCell<Option<CFRunLoopSourceRef>>,
     media_hotkeys: Arc<Mutex<HashSet<HotKey>>>,
 }
 
@@ -79,13 +80,13 @@ impl GlobalHotKeyManager {
         Ok(Self {
             event_handler_ptr: ptr,
             hotkeys: Mutex::new(BTreeMap::new()),
-            event_tap: None,
-            event_tap_source: None,
+            event_tap: RefCell::new(None),
+            event_tap_source: RefCell::new(None),
             media_hotkeys: Arc::new(Mutex::new(HashSet::new())),
         })
     }
 
-    pub fn register(&mut self, hotkey: HotKey) -> crate::Result<()> {
+    pub fn register(&self, hotkey: HotKey) -> crate::Result<()> {
         let mut mods: u32 = 0;
         if hotkey.mods.contains(Modifiers::SHIFT) {
             mods |= 512;
@@ -158,10 +159,11 @@ impl GlobalHotKeyManager {
         }
     }
 
-    pub fn unregister(&mut self, hotkey: HotKey) -> crate::Result<()> {
+    pub fn unregister(&self, hotkey: HotKey) -> crate::Result<()> {
         if is_media_key(hotkey.key) {
-            self.media_hotkeys.lock().unwrap().remove(&hotkey);
-            if self.media_hotkeys.lock().unwrap().is_empty() {
+            let mut media_hotkey = self.media_hotkeys.lock().unwrap();
+            media_hotkey.remove(&hotkey);
+            if media_hotkey.is_empty() {
                 self.stop_watching_media_keys();
             }
         } else if let Some(hotkeywrapper) = self.hotkeys.lock().unwrap().remove(&hotkey.id()) {
@@ -171,14 +173,14 @@ impl GlobalHotKeyManager {
         Ok(())
     }
 
-    pub fn register_all(&mut self, hotkeys: &[HotKey]) -> crate::Result<()> {
+    pub fn register_all(&self, hotkeys: &[HotKey]) -> crate::Result<()> {
         for hotkey in hotkeys {
             self.register(*hotkey)?;
         }
         Ok(())
     }
 
-    pub fn unregister_all(&mut self, hotkeys: &[HotKey]) -> crate::Result<()> {
+    pub fn unregister_all(&self, hotkeys: &[HotKey]) -> crate::Result<()> {
         for hotkey in hotkeys {
             self.unregister(*hotkey)?;
         }
@@ -197,8 +199,8 @@ impl GlobalHotKeyManager {
         Ok(())
     }
 
-    fn start_watching_media_keys(&mut self) -> crate::Result<()> {
-        if self.event_tap.is_some() || self.event_tap_source.is_some() {
+    fn start_watching_media_keys(&self) -> crate::Result<()> {
+        if self.event_tap.borrow().is_some() || self.event_tap_source.borrow().is_some() {
             return Ok(());
         }
 
@@ -215,13 +217,18 @@ impl GlobalHotKeyManager {
             if event_tap.is_null() {
                 return Err(crate::Error::FailedToWatchMediaKeyEvent);
             }
-            self.event_tap = Some(event_tap);
+            *self.event_tap.borrow_mut() = Some(event_tap);
 
             let loop_source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, event_tap, 0);
             if loop_source.is_null() {
+                // cleanup event_tap
+                CFMachPortInvalidate(event_tap);
+                CFRelease(event_tap as *const c_void);
+                *self.event_tap.borrow_mut() = None;
+
                 return Err(crate::Error::FailedToWatchMediaKeyEvent);
             }
-            self.event_tap_source = Some(loop_source);
+            *self.event_tap_source.borrow_mut() = Some(loop_source);
 
             let run_loop = CFRunLoopGetMain();
             CFRunLoopAddSource(run_loop, loop_source, kCFRunLoopCommonModes);
@@ -231,18 +238,16 @@ impl GlobalHotKeyManager {
         }
     }
 
-    fn stop_watching_media_keys(&mut self) {
-        if let (Some(event_tap), Some(event_tap_source)) = (self.event_tap, self.event_tap_source) {
-            unsafe {
+    fn stop_watching_media_keys(&self) {
+        unsafe {
+            if let Some(event_tap_source) = self.event_tap_source.borrow_mut().take() {
                 let run_loop = CFRunLoopGetMain();
                 CFRunLoopRemoveSource(run_loop, event_tap_source, kCFRunLoopCommonModes);
-
+                CFRelease(event_tap_source as *const c_void);
+            }
+            if let Some(event_tap) = self.event_tap.borrow_mut().take() {
                 CFMachPortInvalidate(event_tap);
                 CFRelease(event_tap as *const c_void);
-                self.event_tap = None;
-
-                CFRelease(event_tap_source as *const c_void);
-                self.event_tap_source = None;
             }
         }
     }
