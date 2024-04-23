@@ -199,7 +199,8 @@ fn events_processor(thread_rx: Receiver<ThreadMessage>) {
             let mut event: xlib::XEvent = std::mem::zeroed();
 
             loop {
-                if (xlib.XPending)(display) > 0 {
+                // Always service all pending events to avoid a queue of events from building up.
+                while (xlib.XPending)(display) > 0 {
                     (xlib.XNextEvent)(display, &mut event);
                     match event.get_type() {
                         e @ xlib::KeyPress | e @ xlib::KeyRelease => {
