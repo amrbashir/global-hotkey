@@ -7,7 +7,6 @@ use cocoa::{
 use keyboard_types::{Code, Modifiers};
 use objc::{class, msg_send, sel, sel_impl};
 use std::{
-    cell::RefCell,
     collections::{BTreeMap, HashSet},
     ffi::c_void,
     ptr,
@@ -38,8 +37,8 @@ mod ffi;
 pub struct GlobalHotKeyManager {
     event_handler_ptr: EventHandlerRef,
     hotkeys: Mutex<BTreeMap<u32, HotKeyWrapper>>,
-    event_tap: RefCell<Option<CFMachPortRef>>,
-    event_tap_source: RefCell<Option<CFRunLoopSourceRef>>,
+    event_tap: Mutex<Option<CFMachPortRef>>,
+    event_tap_source: Mutex<Option<CFRunLoopSourceRef>>,
     media_hotkeys: Arc<Mutex<HashSet<HotKey>>>,
 }
 
@@ -80,8 +79,8 @@ impl GlobalHotKeyManager {
         Ok(Self {
             event_handler_ptr: ptr,
             hotkeys: Mutex::new(BTreeMap::new()),
-            event_tap: RefCell::new(None),
-            event_tap_source: RefCell::new(None),
+            event_tap: Mutex::new(None),
+            event_tap_source: Mutex::new(None),
             media_hotkeys: Arc::new(Mutex::new(HashSet::new())),
         })
     }
@@ -200,13 +199,16 @@ impl GlobalHotKeyManager {
     }
 
     fn start_watching_media_keys(&self) -> crate::Result<()> {
-        if self.event_tap.borrow().is_some() || self.event_tap_source.borrow().is_some() {
+        let mut event_tap = self.event_tap.lock().unwrap();
+        let mut event_tap_source = self.event_tap_source.lock().unwrap();
+
+        if event_tap.is_some() || event_tap_source.is_some() {
             return Ok(());
         }
 
         unsafe {
             let event_mask: CGEventMask = CGEventMaskBit!(CGEventType::SystemDefined);
-            let event_tap = CGEventTapCreate(
+            let tap = CGEventTapCreate(
                 CGEventTapLocation::Session,
                 CGEventTapPlacement::HeadInsertEventTap,
                 CGEventTapOptions::Default,
@@ -214,25 +216,25 @@ impl GlobalHotKeyManager {
                 media_key_event_callback,
                 Arc::into_raw(self.media_hotkeys.clone()) as *const c_void,
             );
-            if event_tap.is_null() {
+            if tap.is_null() {
                 return Err(crate::Error::FailedToWatchMediaKeyEvent);
             }
-            *self.event_tap.borrow_mut() = Some(event_tap);
+            *event_tap = Some(tap);
 
-            let loop_source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, event_tap, 0);
+            let loop_source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0);
             if loop_source.is_null() {
                 // cleanup event_tap
-                CFMachPortInvalidate(event_tap);
-                CFRelease(event_tap as *const c_void);
-                *self.event_tap.borrow_mut() = None;
+                CFMachPortInvalidate(tap);
+                CFRelease(tap as *const c_void);
+                *event_tap = None;
 
                 return Err(crate::Error::FailedToWatchMediaKeyEvent);
             }
-            *self.event_tap_source.borrow_mut() = Some(loop_source);
+            *event_tap_source = Some(loop_source);
 
             let run_loop = CFRunLoopGetMain();
             CFRunLoopAddSource(run_loop, loop_source, kCFRunLoopCommonModes);
-            CGEventTapEnable(event_tap, true);
+            CGEventTapEnable(tap, true);
 
             Ok(())
         }
@@ -240,12 +242,12 @@ impl GlobalHotKeyManager {
 
     fn stop_watching_media_keys(&self) {
         unsafe {
-            if let Some(event_tap_source) = self.event_tap_source.borrow_mut().take() {
+            if let Some(event_tap_source) = self.event_tap_source.lock().unwrap().take() {
                 let run_loop = CFRunLoopGetMain();
                 CFRunLoopRemoveSource(run_loop, event_tap_source, kCFRunLoopCommonModes);
                 CFRelease(event_tap_source as *const c_void);
             }
-            if let Some(event_tap) = self.event_tap.borrow_mut().take() {
+            if let Some(event_tap) = self.event_tap.lock().unwrap().take() {
                 CFMachPortInvalidate(event_tap);
                 CFRelease(event_tap as *const c_void);
             }
@@ -328,6 +330,7 @@ impl Drop for GlobalHotKeyManager {
         unsafe {
             RemoveEventHandler(self.event_handler_ptr);
         }
+        self.stop_watching_media_keys()
     }
 }
 
