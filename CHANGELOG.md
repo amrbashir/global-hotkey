@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.5.2]
+
+- [`c530be0`](https://www.github.com/tauri-apps/global-hotkey/commit/c530be0dbf939d2dd8d05eacc2071f493769a834)([#71](https://www.github.com/tauri-apps/global-hotkey/pull/71)) Support registering media play/pause/stop/next/prev keys.
+- [`24f41b0`](https://www.github.com/tauri-apps/global-hotkey/commit/24f41b0fd9f54e822e6397bc95d9e717c67aab72)([#73](https://www.github.com/tauri-apps/global-hotkey/pull/73)) Always service all pending events to avoid a queue of events from building up.
+
 ## \[0.5.1]
 
 - [`89199d9`](https://www.github.com/tauri-apps/global-hotkey/commit/89199d930db3a71f1e19a29d6c1d6ff2e8cffb11)([#64](https://www.github.com/tauri-apps/global-hotkey/pull/64)) Add no-op implementations for unsupported targets.
