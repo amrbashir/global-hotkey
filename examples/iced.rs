@@ -31,8 +31,9 @@ impl Application for Example {
         let manager = GlobalHotKeyManager::new().unwrap();
         let hotkey_1 = HotKey::new(Some(Modifiers::CONTROL), Code::ArrowRight);
         let hotkey_2 = HotKey::new(None, Code::ArrowUp);
-        manager.register(hotkey_2).unwrap();
+
         manager.register(hotkey_1).unwrap();
+        manager.register(hotkey_2).unwrap();
         (
             Example {
                 last_pressed: "".to_string(),

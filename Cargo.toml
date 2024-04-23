@@ -16,6 +16,11 @@ keyboard-types = "0.7"
 once_cell = "1"
 thiserror = "1"
 
+[target."cfg(target_os = \"macos\")".dependencies]
+bitflags = "2"
+cocoa = "0.25"
+objc = "0.2"
+
 [target."cfg(target_os = \"windows\")".dependencies.windows-sys]
 version = "0.52"
 features = [

@@ -159,6 +159,7 @@ impl GlobalHotKeyManager {
         Ok(())
     }
 }
+
 #[cfg(test)]
 mod tests {
     fn assert_send<T: Send>() {}
