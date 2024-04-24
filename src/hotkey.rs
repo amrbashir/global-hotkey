@@ -97,7 +97,7 @@ impl HotKey {
     }
 
     fn generate_hash(&self) -> u32 {
-        let hotkey_str = self.to_string();
+        let hotkey_str = self.into_string();
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         hotkey_str.hash(&mut hasher);
         std::hash::Hasher::finish(&hasher) as u32
@@ -118,8 +118,8 @@ impl HotKey {
         self.mods == *modifiers & base_mods && self.key == *key
     }
 
-    /// Returns a string representation of this hotkey.
-    pub fn to_string(&self) -> String {
+    /// Converts this hotkey into a string.
+    pub fn into_string(self) -> String {
         let mut hotkey = String::new();
         if self.mods.contains(Modifiers::SHIFT) {
             hotkey.push_str("shift+")
@@ -140,7 +140,7 @@ impl HotKey {
 
 impl Display for HotKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_string())
+        write!(f, "{}", self.into_string())
     }
 }
 
