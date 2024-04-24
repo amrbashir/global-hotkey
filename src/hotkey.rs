@@ -28,7 +28,7 @@
 //!
 
 pub use keyboard_types::{Code, Modifiers};
-use std::{borrow::Borrow, hash::Hash, str::FromStr};
+use std::{borrow::Borrow, fmt::Display, hash::Hash, str::FromStr};
 
 #[cfg(target_os = "macos")]
 pub const CMD_OR_CTRL: Modifiers = Modifiers::SUPER;
@@ -50,9 +50,35 @@ pub enum HotKeyParseError {
 /// one key ([`Code`](crate::hotkey::Code)).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct HotKey {
-    pub(crate) mods: Modifiers,
-    pub(crate) key: Code,
-    id: u32,
+    /// The hotkey modifiers.
+    pub mods: Modifiers,
+    /// The hotkey key.
+    pub key: Code,
+    /// The hotkey id.
+    pub id: u32,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for HotKey {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let hotkey = String::deserialize(deserializer)?;
+        hotkey
+            .parse()
+            .map_err(|e: HotKeyParseError| serde::de::Error::custom(e.to_string()))
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for HotKey {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.to_string().serialize(serializer)
+    }
 }
 
 impl HotKey {
@@ -65,27 +91,13 @@ impl HotKey {
             mods.insert(Modifiers::SUPER);
         }
 
-        let id = Self::generate_hash(mods, key);
-
-        Self { mods, key, id }
+        let mut hotkey = Self { mods, key, id: 0 };
+        hotkey.id = hotkey.generate_hash();
+        hotkey
     }
 
-    fn generate_hash(mods: Modifiers, key: Code) -> u32 {
-        let mut hotkey_str = String::new();
-        if mods.contains(Modifiers::SHIFT) {
-            hotkey_str.push_str("shift+")
-        }
-        if mods.contains(Modifiers::CONTROL) {
-            hotkey_str.push_str("control+")
-        }
-        if mods.contains(Modifiers::ALT) {
-            hotkey_str.push_str("alt+")
-        }
-        if mods.contains(Modifiers::SUPER) {
-            hotkey_str.push_str("super+")
-        }
-        hotkey_str.push_str(&key.to_string());
-
+    fn generate_hash(&self) -> u32 {
+        let hotkey_str = self.to_string();
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         hotkey_str.hash(&mut hasher);
         std::hash::Hasher::finish(&hasher) as u32
@@ -104,6 +116,31 @@ impl HotKey {
         let modifiers = modifiers.borrow();
         let key = key.borrow();
         self.mods == *modifiers & base_mods && self.key == *key
+    }
+
+    /// Returns a string representation of this hotkey.
+    pub fn to_string(&self) -> String {
+        let mut hotkey = String::new();
+        if self.mods.contains(Modifiers::SHIFT) {
+            hotkey.push_str("shift+")
+        }
+        if self.mods.contains(Modifiers::CONTROL) {
+            hotkey.push_str("control+")
+        }
+        if self.mods.contains(Modifiers::ALT) {
+            hotkey.push_str("alt+")
+        }
+        if self.mods.contains(Modifiers::SUPER) {
+            hotkey.push_str("super+")
+        }
+        hotkey.push_str(&self.key.to_string());
+        hotkey
+    }
+}
+
+impl Display for HotKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
     }
 }
 

@@ -62,6 +62,7 @@ use hotkey::HotKey;
 
 /// Describes the state of the [`HotKey`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub enum HotKeyState {
     /// The [`HotKey`] is pressed (the key is down).
     Pressed,
@@ -71,6 +72,7 @@ pub enum HotKeyState {
 
 /// Describes a global hotkey event emitted when a [`HotKey`] is pressed or released.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct GlobalHotKeyEvent {
     /// Id of the associated [`HotKey`].
     pub id: u32,

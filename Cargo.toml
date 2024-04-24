@@ -10,11 +10,15 @@ repository = "https://github.com/amrbashir/global-hotkey"
 documentation = "https://docs.rs/global-hotkey"
 categories = [ "gui" ]
 
+[features]
+serde = [ "dep:serde" ]
+
 [dependencies]
 crossbeam-channel = "0.5"
 keyboard-types = "0.7"
 once_cell = "1"
 thiserror = "1"
+serde = { version = "1", optional = true, features = ["derive"] }
 
 [target."cfg(target_os = \"macos\")".dependencies]
 bitflags = "2"
