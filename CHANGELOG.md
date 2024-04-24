@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.5.3]
+
+- [`a468ede`](https://www.github.com/tauri-apps/global-hotkey/commit/a468ede66aa2102f146bebd71ad618eff550997a)([#75](https://www.github.com/tauri-apps/global-hotkey/pull/75)) Add `serde` feature flag and implement `Deserialize` and `Serialize` for `GlobalHotKeyEvent`, `HotKeyState` and `HotKey` types.
+- [`a468ede`](https://www.github.com/tauri-apps/global-hotkey/commit/a468ede66aa2102f146bebd71ad618eff550997a)([#75](https://www.github.com/tauri-apps/global-hotkey/pull/75)) Add `HotKey::into_string` method and implement `Display` for `HotKey`.
+
 ## \[0.5.2]
 
 - [`c530be0`](https://www.github.com/tauri-apps/global-hotkey/commit/c530be0dbf939d2dd8d05eacc2071f493769a834)([#71](https://www.github.com/tauri-apps/global-hotkey/pull/71)) Support registering media play/pause/stop/next/prev keys.
