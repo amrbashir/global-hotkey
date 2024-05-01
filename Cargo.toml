@@ -14,7 +14,7 @@ categories = [ "gui" ]
 serde = [ "dep:serde" ]
 
 [dependencies]
-crossbeam-channel = "0.5"
+crossbeam-channel = "0.5.12"
 keyboard-types = "0.7"
 once_cell = "1"
 thiserror = "1"
