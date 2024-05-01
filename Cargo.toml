@@ -18,7 +18,7 @@ crossbeam-channel = "0.5"
 keyboard-types = "0.7"
 once_cell = "1"
 thiserror = "1"
-serde = { version = "1", optional = true, features = [ "derive" ] }
+serde = { version = "1.0.200", optional = true, features = [ "derive" ] }
 
 [target."cfg(target_os = \"macos\")".dependencies]
 bitflags = "2"
