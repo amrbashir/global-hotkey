@@ -1,5 +1,9 @@
 # Changelog
 
+## \[0.5.4]
+
+- [`e9d263c`](https://www.github.com/tauri-apps/global-hotkey/commit/e9d263c2d9b9535af8d64c7b8950308d16b57b94) Fix parsing of `MEDIATRACKPREV` and `MEDIATRACKPREVIOUS` keys.
+
 ## \[0.5.3]
 
 - [`a468ede`](https://www.github.com/tauri-apps/global-hotkey/commit/a468ede66aa2102f146bebd71ad618eff550997a)([#75](https://www.github.com/tauri-apps/global-hotkey/pull/75)) Add `serde` feature flag and implement `Deserialize` and `Serialize` for `GlobalHotKeyEvent`, `HotKeyState` and `HotKey` types.
