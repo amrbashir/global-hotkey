@@ -460,7 +460,7 @@ fn test_parse_hotkey() {
 
     // Ensure that if it is just multiple modifiers, we do not panic.
     // This would be a regression if this happened.
-    if let Ok(_) = HotKey::from_str("Shift+Ctrl") {
+    if HotKey::from_str("Shift+Ctrl").is_ok() {
         panic!("This is not a valid hotkey");
     }
 }
