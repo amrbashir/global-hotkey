@@ -231,13 +231,7 @@ fn parse_hotkey(hotkey: &str) -> Result<HotKey, HotKeyParseError> {
 
     Ok(HotKey::new(
         Some(mods),
-        match key {
-            Some(k) => k,
-            None => {
-                // This would mean the hotkey is more than one modifier with no key.
-                return Err(HotKeyParseError::InvalidFormat(hotkey.to_string()));
-            }
-        },
+        key.ok_or_else(|| HotKeyParseError::InvalidFormat(hotkey.to_string()))?,
     ))
 }
 
