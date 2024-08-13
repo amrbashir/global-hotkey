@@ -1,5 +1,9 @@
 # Changelog
 
+## \[0.5.5]
+
+- [`c750004`](https://www.github.com/tauri-apps/global-hotkey/commit/c7500047fb62154cf861878efb334c61bd98988a) ([#92](https://www.github.com/tauri-apps/global-hotkey/pull/92) by [@IAmJSD](https://www.github.com/tauri-apps/global-hotkey/../../IAmJSD)) Fix a panic when parsing `HotKey` from a string and return an error instead, if the hotkey string consists of only modifiers and doesn't contain a key.
+
 ## \[0.5.4]
 
 - [`e9d263c`](https://www.github.com/tauri-apps/global-hotkey/commit/e9d263c2d9b9535af8d64c7b8950308d16b57b94) Fix parsing of `MEDIATRACKPREV` and `MEDIATRACKPREVIOUS` keys.
