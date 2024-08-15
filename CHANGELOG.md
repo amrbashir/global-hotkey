@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.6.0]
+
+- [`8b13a61`](https://www.github.com/tauri-apps/global-hotkey/commit/8b13a6159d776a6a282ad7ca5c4b896cc91e325a) Removed `Sync` and `Send` implementation for `GlobalHotKeyManager`
+- [`8b13a61`](https://www.github.com/tauri-apps/global-hotkey/commit/8b13a6159d776a6a282ad7ca5c4b896cc91e325a) Update `windows-sys` crate to `0.59`
+
 ## \[0.5.5]
 
 - [`c750004`](https://www.github.com/tauri-apps/global-hotkey/commit/c7500047fb62154cf861878efb334c61bd98988a) ([#92](https://www.github.com/tauri-apps/global-hotkey/pull/92) by [@IAmJSD](https://www.github.com/tauri-apps/global-hotkey/../../IAmJSD)) Fix a panic when parsing `HotKey` from a string and return an error instead, if the hotkey string consists of only modifiers and doesn't contain a key.
