@@ -1,11 +1,6 @@
-use bitflags::bitflags;
-use cocoa::{
-    appkit::NSEventType,
-    base::id,
-    foundation::{NSInteger, NSUInteger},
-};
 use keyboard_types::{Code, Modifiers};
-use objc::{class, msg_send, sel, sel_impl};
+use objc2::{msg_send_id, rc::Retained, ClassType};
+use objc2_app_kit::{NSEvent, NSEventModifierFlags, NSEventSubtype, NSEventType};
 use std::{
     collections::{BTreeMap, HashSet},
     ffi::c_void,
@@ -255,35 +250,6 @@ impl GlobalHotKeyManager {
     }
 }
 
-bitflags! {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    struct NSEventModifierFlags: NSUInteger {
-        const Shift = 1 << 17;
-        const Control = 1 << 18;
-        const Option = 1 << 19;
-        const Command = 1 << 20;
-    }
-}
-
-impl From<NSEventModifierFlags> for Modifiers {
-    fn from(mod_flags: NSEventModifierFlags) -> Self {
-        let mut mods = Modifiers::empty();
-        if mod_flags.contains(NSEventModifierFlags::Shift) {
-            mods |= Modifiers::SHIFT;
-        }
-        if mod_flags.contains(NSEventModifierFlags::Control) {
-            mods |= Modifiers::CONTROL;
-        }
-        if mod_flags.contains(NSEventModifierFlags::Option) {
-            mods |= Modifiers::ALT;
-        }
-        if mod_flags.contains(NSEventModifierFlags::Command) {
-            mods |= Modifiers::META;
-        }
-        mods
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[allow(non_camel_case_types)]
 enum NX_KEYTYPE {
@@ -294,10 +260,10 @@ enum NX_KEYTYPE {
     Rewind = 20,
 }
 
-impl TryFrom<i64> for NX_KEYTYPE {
+impl TryFrom<isize> for NX_KEYTYPE {
     type Error = String;
 
-    fn try_from(value: i64) -> Result<Self, Self::Error> {
+    fn try_from(value: isize) -> Result<Self, Self::Error> {
         match value {
             16 => Ok(NX_KEYTYPE::Play),
             17 => Ok(NX_KEYTYPE::Next),
@@ -381,13 +347,13 @@ unsafe extern "C" fn media_key_event_callback(
         return event;
     }
 
-    let ns_event: id = msg_send![class!(NSEvent), eventWithCGEvent:event];
-    let event_type: NSEventType = msg_send![ns_event, type];
-    let event_subtype: u64 = msg_send![ns_event, subtype];
+    let ns_event: Retained<NSEvent> = msg_send_id![NSEvent::class(), eventWithCGEvent: event];
+    let event_type = ns_event.r#type();
+    let event_subtype = ns_event.subtype();
 
-    if event_type == NSEventType::NSSystemDefined && event_subtype == 8 {
+    if event_type == NSEventType::SystemDefined && event_subtype == NSEventSubtype::ScreenChanged {
         // Key
-        let data_1: NSInteger = msg_send![ns_event, data1];
+        let data_1 = ns_event.data1();
         let nx_keytype = NX_KEYTYPE::try_from((data_1 & 0xFFFF0000) >> 16);
         if nx_keytype.is_err() {
             return event;
@@ -395,11 +361,23 @@ unsafe extern "C" fn media_key_event_callback(
         let nx_keytype = nx_keytype.unwrap();
 
         // Modifiers
-        let mods: NSUInteger = msg_send![ns_event, modifierFlags];
-        let mods = NSEventModifierFlags::from_bits_truncate(mods);
+        let flags = ns_event.modifierFlags();
+        let mut mods = Modifiers::empty();
+        if flags.contains(NSEventModifierFlags::NSEventModifierFlagShift) {
+            mods |= Modifiers::SHIFT;
+        }
+        if flags.contains(NSEventModifierFlags::NSEventModifierFlagControl) {
+            mods |= Modifiers::CONTROL;
+        }
+        if flags.contains(NSEventModifierFlags::NSEventModifierFlagOption) {
+            mods |= Modifiers::ALT;
+        }
+        if flags.contains(NSEventModifierFlags::NSEventModifierFlagCommand) {
+            mods |= Modifiers::META;
+        }
 
         // Generate hotkey for matching
-        let hotkey = HotKey::new(Some(mods.into()), nx_keytype.into());
+        let hotkey = HotKey::new(Some(mods), nx_keytype.into());
 
         // Prevent Arc been releaded after callback returned
         let media_hotkeys = &*(user_info as *const Mutex<HashSet<HotKey>>);

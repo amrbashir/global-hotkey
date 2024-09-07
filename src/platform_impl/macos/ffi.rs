@@ -7,6 +7,8 @@
 
 use std::ffi::{c_long, c_void};
 
+use objc2::encode::{Encode, Encoding, RefEncode};
+
 pub type UInt32 = ::std::os::raw::c_uint;
 pub type SInt32 = ::std::os::raw::c_int;
 pub type OSStatus = SInt32;
@@ -198,6 +200,10 @@ macro_rules! CGEventMaskBit {
 
 pub enum CGEvent {}
 pub type CGEventRef = *const CGEvent;
+
+unsafe impl RefEncode for CGEvent {
+    const ENCODING_REF: Encoding = Encoding::Pointer(&Encoding::Struct("__CGEvent", &[]));
+}
 
 pub type CGEventTapProxy = *const c_void;
 type CGEventTapCallBack = unsafe extern "C" fn(
