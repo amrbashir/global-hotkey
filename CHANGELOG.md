@@ -1,5 +1,9 @@
 # Changelog
 
+## \[0.6.1]
+
+- [`7d15d09`](https://www.github.com/tauri-apps/global-hotkey/commit/7d15d09e518130bf0a1b44e3512cb6f5ed361164) ([#99](https://www.github.com/tauri-apps/global-hotkey/pull/99) by [@madsmtm](https://www.github.com/tauri-apps/global-hotkey/../../madsmtm)) Use `objc2` internally, leading to slightly better memory- and type-safety.
+
 ## \[0.6.0]
 
 - [`8b13a61`](https://www.github.com/tauri-apps/global-hotkey/commit/8b13a6159d776a6a282ad7ca5c4b896cc91e325a) Removed `Sync` and `Send` implementation for `GlobalHotKeyManager`
