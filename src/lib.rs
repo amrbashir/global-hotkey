@@ -139,7 +139,7 @@ pub struct GlobalHotKeyManager {
 impl GlobalHotKeyManager {
     pub fn new() -> crate::Result<Self> {
         Ok(Self {
-            platform_impl: platform_impl::GlobalHotKeyManager::new()?,
+            platform_impl: platform_impl::GlobalHotKeyManager::new(),
         })
     }
 

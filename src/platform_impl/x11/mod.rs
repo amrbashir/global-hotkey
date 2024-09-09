@@ -26,10 +26,10 @@ pub struct GlobalHotKeyManager {
 }
 
 impl GlobalHotKeyManager {
-    pub fn new() -> crate::Result<Self> {
+    pub fn new() -> Self {
         let (thread_tx, thread_rx) = unbounded();
         std::thread::spawn(|| events_processor(thread_rx));
-        Ok(Self { thread_tx })
+        Self { thread_tx }
     }
 
     pub fn register(&self, hotkey: HotKey) -> crate::Result<()> {
