@@ -1,5 +1,9 @@
 # Changelog
 
+## \[0.6.2]
+
+- [`2c7397b`](https://www.github.com/tauri-apps/global-hotkey/commit/2c7397b27ccb2efd4589bb364e611a80635413c8) ([#106](https://www.github.com/tauri-apps/global-hotkey/pull/106) by [@FabianLars](https://www.github.com/tauri-apps/global-hotkey/../../FabianLars)) Fixed an issue causing compilation to fail for 32-bit targets.
+
 ## \[0.6.1]
 
 - [`7d15d09`](https://www.github.com/tauri-apps/global-hotkey/commit/7d15d09e518130bf0a1b44e3512cb6f5ed361164) ([#99](https://www.github.com/tauri-apps/global-hotkey/pull/99) by [@madsmtm](https://www.github.com/tauri-apps/global-hotkey/../../madsmtm)) Use `objc2` internally, leading to slightly better memory- and type-safety.
