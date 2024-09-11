@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-License-Identifier: MIT
 
-use std::{collections::BTreeMap, ptr};
+use std::{collections::BTreeMap, ffi::c_ulong, ptr};
 
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use keyboard_types::{Code, Modifiers};
@@ -105,7 +105,7 @@ const IGNORED_MODS: [u32; 4] = [
 fn register_hotkey(
     xlib: &Xlib,
     display: *mut _XDisplay,
-    root: u64,
+    root: c_ulong,
     hotkeys: &mut BTreeMap<u32, Vec<(u32, u32, bool)>>,
     hotkey: HotKey,
 ) -> crate::Result<()> {
@@ -159,7 +159,7 @@ fn register_hotkey(
 fn unregister_hotkey(
     xlib: &Xlib,
     display: *mut _XDisplay,
-    root: u64,
+    root: c_ulong,
     hotkeys: &mut BTreeMap<u32, Vec<(u32, u32, bool)>>,
     hotkey: HotKey,
 ) -> crate::Result<()> {
@@ -189,7 +189,7 @@ fn events_processor(thread_rx: Receiver<ThreadMessage>) {
     if let Ok(xlib) = xlib::Xlib::open() {
         unsafe {
             let display = (xlib.XOpenDisplay)(ptr::null());
-            let root = (xlib.XDefaultRootWindow)(display);
+            let root: c_ulong = (xlib.XDefaultRootWindow)(display);
 
             // Only trigger key release at end of repeated keys
             let mut supported_rtrn: i32 = 0;
