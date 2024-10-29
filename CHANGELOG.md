@@ -1,5 +1,9 @@
 # Changelog
 
+## \[0.6.3]
+
+- [`ddf5515`](https://www.github.com/tauri-apps/global-hotkey/commit/ddf5515712f85e887e715bda7da40becc9159ac9) ([#112](https://www.github.com/tauri-apps/global-hotkey/pull/112) by [@amrbashir](https://www.github.com/tauri-apps/global-hotkey/../../amrbashir)) Support using `Pause` or `PauseBreak` key on Windows and Linux.
+
 ## \[0.6.2]
 
 - [`2c7397b`](https://www.github.com/tauri-apps/global-hotkey/commit/2c7397b27ccb2efd4589bb364e611a80635413c8) ([#106](https://www.github.com/tauri-apps/global-hotkey/pull/106) by [@FabianLars](https://www.github.com/tauri-apps/global-hotkey/../../FabianLars)) Fixed an issue causing compilation to fail for 32-bit targets.
