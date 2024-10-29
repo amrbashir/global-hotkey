@@ -403,6 +403,7 @@ fn keycode_to_x11_scancode(key: Code) -> Option<u32> {
         Code::MediaStop => keysym::XF86XK_AudioStop,
         Code::MediaTrackNext => keysym::XF86XK_AudioNext,
         Code::MediaTrackPrevious => keysym::XF86XK_AudioPrev,
+        Code::Pause => keysym::XK_Pause,
         _ => return None,
     })
 }

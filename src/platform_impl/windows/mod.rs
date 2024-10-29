@@ -303,6 +303,7 @@ fn key_to_vk(key: &Code) -> Option<VIRTUAL_KEY> {
         Code::MediaStop => VK_MEDIA_STOP,
         Code::MediaTrackNext => VK_MEDIA_NEXT_TRACK,
         Code::MediaTrackPrevious => VK_MEDIA_PREV_TRACK,
+        Code::Pause => VK_PAUSE,
         _ => return None,
     })
 }

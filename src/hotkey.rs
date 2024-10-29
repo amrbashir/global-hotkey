@@ -237,6 +237,7 @@ fn parse_key(key: &str) -> Result<Code, HotKeyParseError> {
         "BACKSLASH" | "\\" => Ok(Backslash),
         "BRACKETLEFT" | "[" => Ok(BracketLeft),
         "BRACKETRIGHT" | "]" => Ok(BracketRight),
+        "PAUSE" | "PAUSEBREAK" => Ok(Pause),
         "COMMA" | "," => Ok(Comma),
         "DIGIT0" | "0" => Ok(Digit0),
         "DIGIT1" | "1" => Ok(Digit1),
