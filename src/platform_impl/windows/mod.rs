@@ -6,7 +6,7 @@ use std::ptr;
 
 use keyboard_types::{Code, Modifiers};
 use windows_sys::Win32::{
-    Foundation::{HWND, LPARAM, LRESULT, WPARAM},
+    Foundation::{ERROR_HOTKEY_ALREADY_REGISTERED, HWND, LPARAM, LRESULT, WIN32_ERROR, WPARAM},
     UI::{
         Input::KeyboardAndMouse::*,
         WindowsAndMessaging::{
@@ -95,7 +95,19 @@ impl GlobalHotKeyManager {
                 let result =
                     unsafe { RegisterHotKey(self.hwnd, hotkey.id() as _, mods, vk_code as _) };
                 if result == 0 {
-                    return Err(crate::Error::AlreadyRegistered(hotkey));
+                    let error = std::io::Error::last_os_error();
+
+                    return match error.raw_os_error() {
+                        Some(raw_os_error) => {
+                            let win32error = WIN32_ERROR::try_from(raw_os_error);
+                            if let Ok(ERROR_HOTKEY_ALREADY_REGISTERED) = win32error {
+                                Err(crate::Error::AlreadyRegistered(hotkey))
+                            } else {
+                                Err(crate::Error::OsError(error))
+                            }
+                        }
+                        _ => Err(crate::Error::OsError(error)),
+                    };
                 }
             }
             _ => {
